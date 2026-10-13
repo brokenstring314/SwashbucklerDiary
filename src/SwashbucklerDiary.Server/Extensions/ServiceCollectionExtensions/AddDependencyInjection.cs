@@ -36,6 +36,7 @@ namespace SwashbucklerDiary.Server.Extensions
             services.AddScoped<IAppLockService, AppLockService>();
 
             services.AddRclDependencyInjection();
+            services.DisableBackupEncryption();
 
             services.AddScoped<IDiaryRepository, DiaryRepository>();
             services.AddScoped<ITagRepository, TagRepository>();
