@@ -66,6 +66,7 @@ namespace SwashbucklerDiary.Rcl.Services
             nameof(Setting.PrivacyModeEntrancePasswordSalt),
             nameof(Setting.AppLockNumberPasswordSalt),
             nameof(Setting.AppLockPatternPasswordSalt),
+            nameof(Setting.BackupEncryption),
         ];
 
         public DiaryFileManager(IAppFileSystem appFileSystem,
