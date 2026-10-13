@@ -517,5 +517,13 @@
   "Align the old version diary reference link with the new version": "Aligner le lien de référence du journal de l'ancienne version avec la nouvelle version",
   "Before version 1.33.9, diaries that have inserted diary references may experience this situation. Of course, the old version diary citation link can still work": "Avant la version 1.33.9, les journaux contenant des références de journal peuvent rencontrer cette situation. Bien sûr, le lien de citation du journal de l'ancienne version peut toujours fonctionner.",
   "Fix media files not recorded after diary merge": "Correction des fichiers médias non enregistrés après la fusion du journal",
-  "Before version 1.33.9, diaries that used merged diaries may experience this situation": "Avant la version 1.33.9, les journaux qui utilisaient la fusion de journaux peuvent rencontrer cette situation."
+  "Before version 1.33.9, diaries that used merged diaries may experience this situation": "Avant la version 1.33.9, les journaux qui utilisaient la fusion de journaux peuvent rencontrer cette situation.",
+  "Encrypt backups": "Encrypt backups",
+  "Encrypt with a password before the backup leaves the device": "Encrypt with a password before the backup leaves the device",
+  "Backup password": "Backup password",
+  "A forgotten backup password cannot be recovered": "A forgotten backup password cannot be recovered",
+  "Password must be at least 8 characters long": "Password must be at least 8 characters long",
+  "Incorrect backup password": "Incorrect backup password",
+  "The backup file is damaged or has been modified": "The backup file is damaged or has been modified",
+  "Encrypted backups are not supported on the current platform": "Encrypted backups are not supported on the current platform"
 }
