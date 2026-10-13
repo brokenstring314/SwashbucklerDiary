@@ -15,6 +15,11 @@ namespace SwashbucklerDiary.Rcl.Pages
         [Inject]
         private IDiaryFileManager DiaryFileManager { get; set; } = default!;
 
+        [Inject]
+        private IBackupEncryptionService BackupEncryptionService { get; set; } = default!;
+
+        private BackupPasswordDialog backupPasswordDialog = default!;
+
         private async Task Backups()
         {
             showBackups = false;
@@ -25,12 +30,32 @@ namespace SwashbucklerDiary.Rcl.Pages
                 return;
             }
 
+            // Optional encryption: ask for the password before any work starts; it is not stored.
+            string? password = null;
+            if (BackupEncryptionService.Enabled)
+            {
+                password = await backupPasswordDialog.ShowAsync(true);
+                if (password is null)
+                {
+                    return;
+                }
+            }
+
             AlertService.StartLoading();
 
+            string? exportedFilePath = null;
+            string? encryptedFilePath = null;
             try
             {
-                string filePath = await DiaryFileManager.ExportDBAsync(true);
+                string filePath = exportedFilePath = await DiaryFileManager.ExportDBAsync(true);
                 string name = DiaryFileManager.GetBackupFileName();
+                if (password is not null)
+                {
+                    encryptedFilePath = await BackupEncryptionService.EncryptFileAsync(filePath, password);
+                    filePath = encryptedFilePath;
+                    name = BackupEncryptionService.GetEncryptedFileName(name);
+                }
+
                 bool isSuccess = await PlatformIntegration.SaveFileAsync(name, filePath);
                 if (isSuccess)
                 {
@@ -39,6 +64,13 @@ namespace SwashbucklerDiary.Rcl.Pages
             }
             finally
             {
+                if (password is not null)
+                {
+                    // Don't keep a plaintext copy of an archive that was meant to leave the device encrypted.
+                    BackupEncryptionService.DeleteTempFile(exportedFilePath);
+                }
+
+                BackupEncryptionService.DeleteTempFile(encryptedFilePath);
                 AlertService.StopLoading();
             }
         }
@@ -66,11 +98,50 @@ namespace SwashbucklerDiary.Rcl.Pages
                 return;
             }
 
+            // Encrypted backups are detected by their header, whatever the current setting; plaintext zips take the old path.
+            string? decryptedFilePath = null;
+            string importFilePath = restoreFilePath;
+            if (await IsEncryptedBackupAsync(restoreFilePath))
+            {
+                if (!BackupEncryptionService.IsSupported)
+                {
+                    await AlertService.ErrorAsync(I18n.T("Encrypted backups are not supported on the current platform"));
+                    return;
+                }
+
+                string? password = await backupPasswordDialog.ShowAsync(false);
+                if (password is null)
+                {
+                    return;
+                }
+
+                AlertService.StartLoading();
+                try
+                {
+                    decryptedFilePath = await BackupEncryptionService.DecryptFileAsync(restoreFilePath, password);
+                    importFilePath = decryptedFilePath;
+                }
+                catch (BackupPasswordIncorrectException)
+                {
+                    await AlertService.ErrorAsync(I18n.T("Incorrect backup password"));
+                    return;
+                }
+                catch (BackupEncryptionException)
+                {
+                    await AlertService.ErrorAsync(I18n.T("The backup file is damaged or has been modified"));
+                    return;
+                }
+                finally
+                {
+                    AlertService.StopLoading();
+                }
+            }
+
             AlertService.StartLoading();
 
             try
             {
-                bool flag = await DiaryFileManager.ImportDBAsync(restoreFilePath);
+                bool flag = await DiaryFileManager.ImportDBAsync(importFilePath);
                 if (flag)
                 {
                     await AlertService.SuccessAsync(I18n.T("Restore successfully"));
@@ -82,7 +153,21 @@ namespace SwashbucklerDiary.Rcl.Pages
             }
             finally
             {
+                BackupEncryptionService.DeleteTempFile(decryptedFilePath);
                 AlertService.StopLoading();
+            }
+        }
+
+        private async Task<bool> IsEncryptedBackupAsync(string path)
+        {
+            try
+            {
+                return await BackupEncryptionService.IsEncryptedFileAsync(path);
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException or NotSupportedException or ArgumentException)
+            {
+                // Let the existing import path handle unreadable files exactly as before.
+                return false;
             }
         }
     }
