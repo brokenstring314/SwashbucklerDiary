@@ -55,7 +55,7 @@ namespace SwashbucklerDiary.Maui.Extensions
             services.AddSingleton<IAvatarService, Services.AvatarService>();
             services.AddScoped<Rcl.Services.IScreenshot, Rcl.Services.Screenshot>();
             services.AddSingleton<IVersionUpdataManager, Services.VersionUpdataManager>();
-            services.AddSingleton<IWebDAV, WebDAV>();
+            services.AddWebDAVWithBackupEncryption();
             services.AddSingleton<ILANSenderService, LANSenderService>();
             services.AddSingleton<ILANReceiverService, LANReceiverService>();
             services.AddSingleton<IProxyService, ProxyService>();
