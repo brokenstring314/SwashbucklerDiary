@@ -90,6 +90,10 @@
     </MListItem>
 </MCard>
 
+<BackupEncryptionSwitch Class="mt-5"></BackupEncryptionSwitch>
+
+<BackupPasswordDialog @ref="backupPasswordDialog"></BackupPasswordDialog>
+
 <WebDavConfigDialog @bind-Visible="showConfig"
                     Form="configModel"
                     OnOK="SaveWebDavConfig">
