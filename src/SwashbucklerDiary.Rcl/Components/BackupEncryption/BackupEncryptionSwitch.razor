@@ -1,0 +1,31 @@
+@namespace SwashbucklerDiary.Rcl.Components
+@inherits MyComponentBase
+
+@if (BackupEncryptionService.IsSupported)
+{
+    <MCard Class="@Class"
+           Elevation="0"
+           Rounded="@("lg")">
+        <MListItem>
+            <MListItemIcon>
+                <MIcon>
+                    mdi:mdi-lock-outline
+                </MIcon>
+            </MListItemIcon>
+            <MListItemContent>
+                <MListItemTitle>
+                    <wc-auto-scroll-text>@(I18n.T("Encrypt backups"))</wc-auto-scroll-text>
+                </MListItemTitle>
+                <MListItemSubtitle Class="text-caption-xs-only">
+                    <wc-auto-scroll-text>@(I18n.T("Encrypt with a password before the backup leaves the device"))</wc-auto-scroll-text>
+                </MListItemSubtitle>
+            </MListItemContent>
+            <MListItemAction>
+                <SettingSwitch Value="BackupEncryptionService.Enabled"
+                               SettingKey="@nameof(Setting.BackupEncryption)"
+                               OnChange="HandleOnChange">
+                </SettingSwitch>
+            </MListItemAction>
+        </MListItem>
+    </MCard>
+}
