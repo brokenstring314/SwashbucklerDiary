@@ -530,5 +530,13 @@
   "App store": "应用商店",
   "China Mobile Cloud Disk": "中国移动云盘",
   "The extracted code": "提取码",
-  "The extracted code has been copied to the clipboard. Click OK to go to the online disk link.": "提取码已复制到剪贴板，点击确定前往网盘链接"
+  "The extracted code has been copied to the clipboard. Click OK to go to the online disk link.": "提取码已复制到剪贴板，点击确定前往网盘链接",
+  "Encrypt backups": "加密备份",
+  "Encrypt with a password before the backup leaves the device": "备份离开设备前先用密码加密",
+  "Backup password": "备份密码",
+  "A forgotten backup password cannot be recovered": "忘记备份密码将无法恢复备份",
+  "Password must be at least 8 characters long": "密码不能少于8个字符",
+  "Incorrect backup password": "备份密码错误",
+  "The backup file is damaged or has been modified": "备份文件已损坏或被修改",
+  "Encrypted backups are not supported on the current platform": "当前平台不支持加密备份"
 }
