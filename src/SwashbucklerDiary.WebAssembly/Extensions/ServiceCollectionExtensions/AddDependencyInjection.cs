@@ -33,6 +33,7 @@ namespace SwashbucklerDiary.WebAssembly.Extensions
             services.AddSingleton<IAppLockService, AppLockService>();
 
             services.AddRclDependencyInjection();
+            services.DisableBackupEncryption();
 
             services.AddSingleton<IDiaryRepository, DiaryRepository>();
             services.AddSingleton<ITagRepository, TagRepository>();
