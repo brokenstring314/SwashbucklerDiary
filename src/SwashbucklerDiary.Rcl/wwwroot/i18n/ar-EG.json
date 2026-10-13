@@ -517,5 +517,13 @@
   "Align the old version diary reference link with the new version": "محاذاة رابط مرجع دفتر اليومية للإصدار القديم مع الإصدار الجديد",
   "Before version 1.33.9, diaries that have inserted diary references may experience this situation. Of course, the old version diary citation link can still work": "قبل الإصدار 1.33.9، قد تواجه دفاتر اليومية التي تحتوي على مراجع دفاتر يومية هذا الموقف. بالطبع، لا يزال رابط اقتباس دفتر اليومية للإصدار القديم يعمل.",
   "Fix media files not recorded after diary merge": "إصلاح مشكلة عدم تسجيل ملفات الوسائط بعد دمج دفتر اليومية",
-  "Before version 1.33.9, diaries that used merged diaries may experience this situation": "قبل الإصدار 1.33.9، قد تواجه دفاتر اليومية التي استخدمت الدمج هذا الموقف."
+  "Before version 1.33.9, diaries that used merged diaries may experience this situation": "قبل الإصدار 1.33.9، قد تواجه دفاتر اليومية التي استخدمت الدمج هذا الموقف.",
+  "Encrypt backups": "Encrypt backups",
+  "Encrypt with a password before the backup leaves the device": "Encrypt with a password before the backup leaves the device",
+  "Backup password": "Backup password",
+  "A forgotten backup password cannot be recovered": "A forgotten backup password cannot be recovered",
+  "Password must be at least 8 characters long": "Password must be at least 8 characters long",
+  "Incorrect backup password": "Incorrect backup password",
+  "The backup file is damaged or has been modified": "The backup file is damaged or has been modified",
+  "Encrypted backups are not supported on the current platform": "Encrypted backups are not supported on the current platform"
 }
