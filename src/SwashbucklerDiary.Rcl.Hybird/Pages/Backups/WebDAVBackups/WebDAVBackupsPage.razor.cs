@@ -34,6 +34,11 @@ namespace SwashbucklerDiary.Rcl.Pages
         [Inject]
         private IDiaryFileManager DiaryFileManager { get; set; } = default!;
 
+        [Inject]
+        private IBackupEncryptionService BackupEncryptionService { get; set; } = default!;
+
+        private BackupPasswordDialog backupPasswordDialog = default!;
+
         protected override void ReadSettings()
         {
             var configJson = SettingService.Get(s => s.WebDavConfig);
@@ -133,11 +138,24 @@ namespace SwashbucklerDiary.Rcl.Pages
         {
             showUpload = false;
 
+            // Optional encryption (done by the IWebDAV decorator): ask for the password first; it is cleared afterwards.
+            if (BackupEncryptionService.Enabled)
+            {
+                string? password = await backupPasswordDialog.ShowAsync(true);
+                if (password is null)
+                {
+                    return;
+                }
+
+                BackupEncryptionService.SetPassword(password);
+            }
+
             AlertService.StartLoading();
 
+            string? exportedFilePath = null;
             try
             {
-                string filePath = await DiaryFileManager.ExportDBAsync(includeDiaryResources);
+                string filePath = exportedFilePath = await DiaryFileManager.ExportDBAsync(includeDiaryResources);
                 using var stream = File.OpenRead(filePath);
                 string fileName = DiaryFileManager.GetBackupFileName();
                 string destFileName = webDavFolderName + "/" + fileName;
@@ -159,6 +177,13 @@ namespace SwashbucklerDiary.Rcl.Pages
             }
             finally
             {
+                if (BackupEncryptionService.Enabled)
+                {
+                    // Don't keep a plaintext copy of an archive that was meant to leave the device encrypted.
+                    BackupEncryptionService.DeleteTempFile(exportedFilePath);
+                }
+
+                BackupEncryptionService.ClearPassword();
                 AlertService.StopLoading();
             }
         }
@@ -201,13 +226,52 @@ namespace SwashbucklerDiary.Rcl.Pages
         {
             showDownload = false;
 
+            // Files named *.encrypted.zip ask for the password up front; others are detected by header after download.
+            if (BackupEncryptionService.IsEncryptedFileName(fileName) && !await RequestRestorePasswordAsync())
+            {
+                return;
+            }
+
             AlertService.StartLoading();
             var destFileName = webDavFolderName + "/" + fileName;
             try
             {
-                using var stream = await WebDAVService.DownloadAsync(destFileName);
-                await DiaryFileManager.ImportDBAsync(stream);
+                Stream stream;
+                try
+                {
+                    stream = await WebDAVService.DownloadAsync(destFileName);
+                }
+                catch (BackupPasswordRequiredException)
+                {
+                    AlertService.StopLoading();
+                    if (!await RequestRestorePasswordAsync())
+                    {
+                        return;
+                    }
+
+                    AlertService.StartLoading();
+                    stream = await WebDAVService.DownloadAsync(destFileName);
+                }
+
+                using (stream)
+                {
+                    await DiaryFileManager.ImportDBAsync(stream);
+                }
+
                 await AlertService.SuccessAsync(I18n.T("Pull successfully"));
+            }
+            catch (BackupEncryptionNotSupportedException)
+            {
+                await AlertService.ErrorAsync(I18n.T("Encrypted backups are not supported on the current platform"));
+            }
+            catch (BackupPasswordIncorrectException)
+            {
+                await AlertService.ErrorAsync(I18n.T("Incorrect backup password"));
+            }
+            catch (BackupEncryptionException e)
+            {
+                await AlertService.ErrorAsync(I18n.T("The backup file is damaged or has been modified"));
+                Logger.LogError(e, "WebDAV encrypted backup could not be decrypted");
             }
             catch (HttpRequestException e)
             {
@@ -221,8 +285,27 @@ namespace SwashbucklerDiary.Rcl.Pages
             }
             finally
             {
+                BackupEncryptionService.ClearPassword();
                 AlertService.StopLoading();
             }
+        }
+
+        private async Task<bool> RequestRestorePasswordAsync()
+        {
+            if (!BackupEncryptionService.IsSupported)
+            {
+                await AlertService.ErrorAsync(I18n.T("Encrypted backups are not supported on the current platform"));
+                return false;
+            }
+
+            string? password = await backupPasswordDialog.ShowAsync(false);
+            if (password is null)
+            {
+                return false;
+            }
+
+            BackupEncryptionService.SetPassword(password);
+            return true;
         }
 
         private async Task<bool> Check()
