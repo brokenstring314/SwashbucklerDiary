@@ -46,8 +46,5 @@
 - 托管内存中的密码字符串无法彻底擦除。
 - 若上游 PR #123 合并，它给 `IWebDAV` 新增的方法需要在 `EncryptedWebDAV` 中补透传；其同步文件不是 `.zip`，装饰器不会处理。
 
-## 顺带修复
-- `SettingService.SetSettingsFromObjectAsync` 中 `GetMethod("SetAsync")` 在两个重载间有歧义，master 上每次恢复数据库备份都会抛 `AmbiguousMatchException`。已单独修复，可另提上游 PR。
-
 ## 测试
 - `tests/SwashbucklerDiary.Rcl.Tests`（xUnit）：`dotnet test tests/SwashbucklerDiary.Rcl.Tests`。
